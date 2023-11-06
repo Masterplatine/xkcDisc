@@ -55,11 +55,9 @@ client.on(Events.InteractionCreate, async interaction => {
 		await command.execute(interaction);
 	} catch (error) {
 		console.error(error);
-    console.timeLog();
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        console.timeLog();
+		if (!interaction.replied && !interaction.deferred) {
+			await interaction.reply({ content: error.message, ephemeral: true });
 		}
 	}
 });
@@ -67,3 +65,5 @@ client.on(Events.InteractionCreate, async interaction => {
 /****** Log In ******/
 // Log in to Discord with your client's token
 client.login(token);
+
+// TODO: Tidy up and factorize code for commands

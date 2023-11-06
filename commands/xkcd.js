@@ -9,8 +9,9 @@ module.exports = {
   .setDescription('Post xkcd comic')
   .addIntegerOption(option =>
     option
-      .setName('number')
-      .setDescription('Comic number. If omitted, post lasted comic.')),
+      .setName('id')
+      .setMinValue(1)
+      .setDescription('ID of comic to post. If omitted, post latest comic.')),
   async execute(interaction) {
     // Get number option
     const comicNumber = interaction.options.getInteger('number') ?? null;
@@ -22,11 +23,11 @@ module.exports = {
     }
     url = url + 'info.0.json';
 
-    // Get xkcd webpage
+    // Get xkcd API webpage
     const response = await fetch(url);
     // Check response validity
     if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
+      throw new Error('Bad option !\nComic #' + comicNumber + 'does not exist\n(Either that or xkcd.com is unreachable)');
     }
     const comicJson = await response.json();
 
