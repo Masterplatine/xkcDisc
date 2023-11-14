@@ -14,12 +14,12 @@ module.exports = {
       .setDescription('ID of comic to post. If omitted, post latest comic.')),
   async execute(interaction) {
     // Get number option
-    const comicNumber = interaction.options.getInteger('number') ?? null;
+    const comicId = interaction.options.getInteger('id') ?? null;
 
     // Build url
     let url = 'https://xkcd.com/';
-    if (comicNumber != null) {
-      url = url + comicNumber + '/';
+    if (comicId != null) {
+      url = url + comicId + '/';
     }
     url = url + 'info.0.json';
 
@@ -27,7 +27,7 @@ module.exports = {
     const response = await fetch(url);
     // Check response validity
     if (!response.ok) {
-      throw new Error('Bad option !\nComic #' + comicNumber + 'does not exist\n(Either that or xkcd.com is unreachable)');
+      throw new Error('Bad option !\nComic #' + comicId + ' does not exist\n(Either that or xkcd.com is unreachable)');
     }
     const comicJson = await response.json();
 
