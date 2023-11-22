@@ -1,11 +1,19 @@
 // discord.js API
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, codeBlock } = require('discord.js');
 
 // TODO write command summary and parameter here. Maybe use doxygen style
 
-const reply = `
-**X**kcd **K**ool **C**ommands for **Disc**ord
+const asciiArtHeader = codeBlock(`
+ __   ___        _____  _          
+ \\ \\ / / |      |  __ \\(_)         
+  \\ V /| | _____| |  | |_ ___  ___ 
+   > < | |/ / __| |  | | / __|/ __|
+  / . \\|   < (__| |__| | \\__ \\ (__ 
+ /_/ \\_\\_|\\_\\___|_____/|_|___/\\___|
+`);
 
+const reply = asciiArtHeader + `
+**X**kcd **K**ool **C**ommands for **Disc**ord
 
 **/xkcd [id:]**
 Post an xkcd comic. Use the [id:] option to pick a specific comic.

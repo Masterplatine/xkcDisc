@@ -8,7 +8,7 @@ const { token } = require('./config.json');
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Attach Collection to Cient instance (useful to use it in other files)
+// Attach Collection to Client instance (useful to use it in other files)
 client.commands = new Collection();
 
 // "commands" folder path
