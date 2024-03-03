@@ -1,6 +1,9 @@
 // discord.js API
 const { SlashCommandBuilder } = require('discord.js');
 
+// Common definitions
+const xkcdCommon = require('../xkcd_common.js');
+
 // Min and Max number of comics one can request
 const NB_MIN_COMICS = 1;
 const NB_MAX_COMICS = 5;
@@ -28,16 +31,19 @@ module.exports = {
       .setMinValue(2)
       .setDescription('Limit random to comic numbers lesser than this parameter.')),
   async execute(interaction) {
+    /**** OPTIONS ****/
     // Get number option. If ommited n=1
     const nbOfComicsRequested = interaction.options.getInteger('howmany') ?? 1;
     const randAfter = interaction.options.getInteger('after') ?? 1;
     let randBefore = interaction.options.getInteger('before') ?? null;
+
+    /**** VARIABLES ****/
     const replyMessages = Array(nbOfComicsRequested);
     const userName = interaction.user.username;
     let nbOfLastComic = 0;
-    let response;
     let comicJson;
 
+    /**** OPTIONS CHECK ****/
     // Check command params
     // 'howmany'
     if (nbOfComicsRequested < NB_MIN_COMICS || nbOfComicsRequested > NB_MAX_COMICS) {
@@ -51,15 +57,8 @@ module.exports = {
         throw new Error('Bad option!\nCommand argument: "after" should be lesser than "before".');
       }
     }
-
     // Get max comic num
-    response = await fetch('https://xkcd.com/info.0.json');
-    // Check response validity
-    if (!response.ok) {
-      await interaction.reply({ content: 'There was an error while trying to reach xkcd.com. Sorry!', ephemeral: true });
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-    comicJson = await response.json();
+    comicJson = await xkcdCommon.getComicJson();
     nbOfLastComic = comicJson.num;
     // Ensure 'after' is less than the last comic id
     if (randAfter >= nbOfLastComic) {
@@ -70,6 +69,7 @@ module.exports = {
       randBefore = nbOfLastComic + 1;
     }
 
+    /**** POST COMICS ****/
     // Generate n random numbers
     for (let l_index = 0; l_index < nbOfComicsRequested; l_index++) {
       const randomComicNumber = Math.floor(randAfter + (randBefore - randAfter) * Math.random());
@@ -78,22 +78,10 @@ module.exports = {
       // Build url
       url = url + randomComicNumber + '/info.0.json';
 
-      // Get xkcd API webpage
-      response = await fetch(url);
-      // Check response validity
-      if (!response.ok) {
-        throw new Error('There was an error while trying to reach xkcd.com. Sorry!');
-      }
-      comicJson = await response.json();
+      comicJson = await xkcdCommon.getComicJson(randomComicNumber);
 
-      // Build reply message
-      // Constructed in a way that is more visual when editing
-      replyMessages[l_index] = '#' + comicJson.num + '\n' +
-                               'Posted ' + comicJson.day + '/' + comicJson.month + '/' + comicJson.year + '\n' +
-                               '\n' +
-                               '**' + comicJson.safe_title + '**\n' +
-                               '*' + comicJson.alt + '*\n' +
-                               comicJson.img;
+      // Build reply message for this comic
+      replyMessages[l_index] = xkcdCommon.buildReplyMessage(comicJson);
     }
 
     // Intiial reply

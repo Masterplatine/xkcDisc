@@ -1,6 +1,9 @@
 // discord.js API
 const { SlashCommandBuilder } = require('discord.js');
 
+// Common definitions
+const xkcdCommon = require('../xkcd_common.js');
+
 // TODO write command summary and parameter here. Maybe use doxygen style
 
 module.exports = {
@@ -16,29 +19,9 @@ module.exports = {
     // Get number option
     const comicId = interaction.options.getInteger('id') ?? null;
 
-    // Build url
-    let url = 'https://xkcd.com/';
-    if (comicId != null) {
-      url = url + comicId + '/';
-    }
-    url = url + 'info.0.json';
+    const comicJson = await xkcdCommon.getComicJson(comicId);
 
-    // Get xkcd API webpage
-    const response = await fetch(url);
-    // Check response validity
-    if (!response.ok) {
-      throw new Error('Bad option !\nComic #' + comicId + ' does not exist\n(Either that or xkcd.com is unreachable)');
-    }
-    const comicJson = await response.json();
-
-    // Build reply message
-    // Constructed in a way that is more visual when editing
-    const reply = '#' + comicJson.num + '\n' +
-                  'Posted ' + comicJson.day + '/' + comicJson.month + '/' + comicJson.year + '\n' +
-                  '\n' +
-                  '**' + comicJson.safe_title + '**\n' +
-                  '*' + comicJson.alt + '*\n' +
-                  comicJson.img;
+    const reply = xkcdCommon.buildReplyMessage(comicJson);
 
     // Reply
     await interaction.reply(reply);

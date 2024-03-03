@@ -1,3 +1,7 @@
+/*
+ * Application entry point
+*/
+
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -7,6 +11,9 @@ const { token } = require('./config.json');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+// Export client instance to use it in other files
+exports.client = client;
 
 // Attach Collection to Client instance (useful to use it in other files)
 client.commands = new Collection();
@@ -39,9 +46,16 @@ client.once(Events.ClientReady, c => {
 
 
 client.on(Events.InteractionCreate, async interaction => {
+  // A bit of logging
+  console.log('------------------------------------------');
+  console.log(new Date().toUTCString());
+  console.log('User', interaction.user);
+  console.log('Cmd', interaction.commandName);
+  console.log('Options', interaction.options);
+  console.log('Channel', interaction.channel);
+
   // Process only slash commands (chat input command)
-	if (!interaction.isChatInputCommand()) return;
-  //console.log(interaction);
+  if (!interaction.isChatInputCommand()) return;
 
   // Read user command
   const command = interaction.client.commands.get(interaction.commandName);
@@ -54,8 +68,10 @@ client.on(Events.InteractionCreate, async interaction => {
 	try {
 		await command.execute(interaction);
 	} catch (error) {
-		console.error(error);
-        console.timeLog();
+    // Log time of error and entire interaction object
+		console.log(new Date().toUTCString());
+    console.log(interaction);
+    console.error(error);
 		if (!interaction.replied && !interaction.deferred) {
 			await interaction.reply({ content: error.message, ephemeral: true });
 		}
@@ -67,3 +83,4 @@ client.on(Events.InteractionCreate, async interaction => {
 client.login(token);
 
 // TODO: Tidy up and factorize code for commands
+
