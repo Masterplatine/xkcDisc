@@ -32,26 +32,33 @@ let automaticPostingLastID = null;
 
 /************ FUNCTIONS ***************/
 async function postComicAutomatic() {
+  // Try-catch all of this, as there is no parent function to catch errors
+  try {
+    // Get last comic ID
+    const comicJson = await getComicJson();
+    const lastComicID = comicJson.num;
 
-  // Get last comic ID
-  const comicJson = await getComicJson();
-  const lastComicID = comicJson.num;
+    // Check if a new comic dropped
+    if (lastComicID > automaticPostingLastID) {
+      // Build message
+      const message = buildReplyMessage(comicJson);
 
-  // Check if a new comic dropped
-  if (lastComicID > automaticPostingLastID) {
-    // Build message
-    const message = buildReplyMessage(comicJson);
+      // Post comic on selected channel
+      const channel = await client.channels.fetch(automaticPostingChannelID);
+      channel.send({ content: message });
 
-    // Post comic on selected channel
-    const channel = await client.channels.fetch(automaticPostingChannelID);
-    channel.send({ content: message });
+      // Update last posted ID
+      automaticPostingLastID = lastComicID;
+    }
+    else {
+      // No new comic, nothing to do
+    }
 
-    // Update last posted ID
-    automaticPostingLastID = lastComicID;
-  }
-  else {
-    // No new comic, nothing to do
-  }
+  } catch (error) {
+    // Log error with timestamp
+		console.log(new Date().toUTCString());
+    console.error(error);
+	}
 }
 
 function setPostingLastID(ComicID) {
